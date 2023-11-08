@@ -1,9 +1,10 @@
 const WebSocket = require('ws');
 var socket = null;
-const url = 'ws://localhost';
 var contador = 0;
+var url;
 class task {
-	async connectarSocket(msgToSend = null) {
+	async connectarSocket(_url = null) {
+		if (_url) url = _url;
 		socket = new WebSocket(url);
 		// Defina manipuladores de eventos para diferentes eventos WebSocket
 		socket.on('open', () => {
@@ -12,7 +13,7 @@ class task {
 			// Agora você pode enviar mensagens para o servidor WebSocket
 		});
 		socket.on('message', (data) => {
-			console.log(data);
+			console.log(data.toString());
 		});
 		socket.on('close', (code, reason) => {
 			//console.log(`Conexão fechada: ${code} - ${reason}`);
@@ -22,18 +23,21 @@ class task {
 			console.error(`Erro na conexão: ${error.message}`);
 			this.rotinaDeReconexão();
 		});
-		if (msgToSend) {
-			socket.send(msgToSend);
+	}
+
+	async enviarSocket(msg) {
+		if (msg && socket) {
+			socket.send(msg);
 		}
 	}
 
-	async rotinaDeReconexão(msgToSend = null) {
+	async rotinaDeReconexão() {
 		if (contador < 2) {
 			contador++;
-			this.connectarSocket(msgToSend);
+			this.connectarSocket();
 		} else {
 			let i = setTimeout(() => {
-				this.connectarSocket(msgToSend);
+				this.connectarSocket();
 			}, 500);
 		}
 	}
